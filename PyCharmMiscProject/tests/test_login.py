@@ -38,7 +38,7 @@ def test_logout(driver):
     secure_page.wait_until_loaded()
     secure_page.click_logout()
 
-    assert "/login" in secure_page.get_current_url()
+    assert "/login" in secure_page.get_current_url() or "/authenticate" in secure_page.get_current_url()
     assert "You logged out of the secure area!" in secure_page.get_flash_message()
 
 

@@ -10,8 +10,10 @@ def driver(request):
         browser = webdriver.Safari()
     elif BROWSER == "chrome":
         browser = webdriver.Chrome()
+    elif BROWSER == "firefox":
+        browser = webdriver.Firefox()
     else:
-        raise ValueError(f"Unsupported browser: {BROWSER}")
+        raise ValueError(f"Unsupported browser: {BROWSER}. Use safari, chrome, or firefox.")
 
     browser.maximize_window()
     yield browser
