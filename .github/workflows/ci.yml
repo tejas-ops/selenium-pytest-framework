@@ -11,9 +11,6 @@ jobs:
   api-tests:
     name: API tests
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: PyCharmMiscProject
 
     steps:
       - name: Checkout code
@@ -24,7 +21,7 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-          cache-dependency-path: PyCharmMiscProject/requirements.txt
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
         run: |
@@ -37,9 +34,6 @@ jobs:
   ui-tests-safari:
     name: UI tests (Safari)
     runs-on: macos-latest
-    defaults:
-      run:
-        working-directory: PyCharmMiscProject
 
     steps:
       - name: Checkout code
@@ -50,7 +44,7 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-          cache-dependency-path: PyCharmMiscProject/requirements.txt
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
         run: |
@@ -70,15 +64,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: screenshots-safari
-          path: PyCharmMiscProject/screenshots/
+          path: screenshots/
           if-no-files-found: ignore
 
   ui-tests-chrome:
     name: UI tests (Chrome)
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: PyCharmMiscProject
 
     steps:
       - name: Checkout code
@@ -89,7 +80,7 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-          cache-dependency-path: PyCharmMiscProject/requirements.txt
+          cache-dependency-path: requirements.txt
 
       - name: Install dependencies
         run: |
@@ -106,5 +97,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: screenshots-chrome
-          path: PyCharmMiscProject/screenshots/
+          path: screenshots/
           if-no-files-found: ignore
