@@ -1,0 +1,11 @@
+{
+  "create_user": {
+    "name": "Pavan",
+    "job": "Automation Engineer"
+  },
+  "update_user": {
+    "id": 2,
+    "name": "Pavan",
+    "job": "Senior Automation Engineer"
+  }
+}

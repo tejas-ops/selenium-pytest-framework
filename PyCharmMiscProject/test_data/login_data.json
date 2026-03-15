@@ -1,0 +1,18 @@
+{
+  "valid_login": {
+    "username": "tomsmith",
+    "password": "SuperSecretPassword!"
+  },
+  "invalid_login_cases": [
+    {
+      "username": "wronguser",
+      "password": "SuperSecretPassword!",
+      "expected_message": "Your username is invalid!"
+    },
+    {
+      "username": "tomsmith",
+      "password": "wrongpass",
+      "expected_message": "Your password is invalid!"
+    }
+  ]
+}

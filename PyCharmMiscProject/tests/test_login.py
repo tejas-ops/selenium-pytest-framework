@@ -1,51 +1,92 @@
 import pytest
+import allure
 from pages.login_page import LoginPage
 from pages.secure_area_page import SecureAreaPage
-from utils.test_data import VALID_USERNAME, VALID_PASSWORD, INVALID_LOGIN_CASES
+from utils.data_loader import load_json
 
+login_data = load_json("login_data.json")
+valid_login = login_data["valid_login"]
+invalid_login_cases = login_data["invalid_login_cases"]
 
 @pytest.mark.smoke
+@allure.feature("Login")
+@allure.story("Valid login")
 def test_valid_login(driver):
-    login_page = LoginPage(driver)
-    login_page.open()
-    login_page.login(VALID_USERNAME, VALID_PASSWORD)
+    with allure.step("Open login page"):
+        login_page = LoginPage(driver)
+        login_page.open()
 
-    secure_page = SecureAreaPage(driver)
-    secure_page.wait_until_loaded()
+    with allure.step("Login with valid credentials"):
+        login_page.login(valid_login["username"], valid_login["password"])
 
-    assert "You logged into a secure area!" in login_page.get_flash_message()
-    assert "/secure" in secure_page.get_current_url()
+    with allure.step("Wait for secure area to load"):
+        secure_page = SecureAreaPage(driver)
+        secure_page.wait_until_loaded()
+
+    with allure.step("Verify successful login"):
+        assert "You logged into a secure area!" in login_page.get_flash_message()
+        assert "/secure" in secure_page.get_current_url()
 
 
 @pytest.mark.regression
-@pytest.mark.parametrize("username,password,expected_message", INVALID_LOGIN_CASES)
+@pytest.mark.parametrize(
+    "username,password,expected_message",
+    [
+        (case["username"], case["password"], case["expected_message"])
+        for case in invalid_login_cases
+    ],
+)
+@allure.feature("Login")
+@allure.story("Invalid login")
 def test_invalid_login(driver, username, password, expected_message):
-    login_page = LoginPage(driver)
-    login_page.open()
-    login_page.login(username, password)
 
-    assert expected_message in login_page.get_flash_message()
-    assert "/login" in login_page.get_current_url()
+    with allure.step("Open login page"):
+        login_page = LoginPage(driver)
+        login_page.open()
+
+    with allure.step("Attempt login with invalid credentials"):
+        login_page.login(username, password)
+
+    with allure.step("Verify error message and URL"):
+        assert expected_message in login_page.get_flash_message()
+        assert "/login" in login_page.get_current_url()
 
 
 @pytest.mark.regression
+@allure.feature("Login")
+@allure.story("Logout")
 def test_logout(driver):
-    login_page = LoginPage(driver)
-    secure_page = SecureAreaPage(driver)
 
-    login_page.open()
-    login_page.login(VALID_USERNAME, VALID_PASSWORD)
-    secure_page.wait_until_loaded()
-    secure_page.click_logout()
+    with allure.step("Initialize pages"):
+        login_page = LoginPage(driver)
+        secure_page = SecureAreaPage(driver)
 
-    assert "/login" in secure_page.get_current_url() or "/authenticate" in secure_page.get_current_url()
-    assert "You logged out of the secure area!" in secure_page.get_flash_message()
+    with allure.step("Open login page"):
+        login_page.open()
+
+    with allure.step("Login with valid credentials"):
+        login_page.login(valid_login["username"], valid_login["password"])
+
+    with allure.step("Wait for secure area page"):
+        secure_page.wait_until_loaded()
+
+    with allure.step("Click logout"):
+        secure_page.click_logout()
+
+    with allure.step("Verify logout success"):
+        assert "/login" in secure_page.get_current_url() or "/authenticate" in secure_page.get_current_url()
+        assert "You logged out of the secure area!" in secure_page.get_flash_message()
 
 
 @pytest.mark.smoke
+@allure.feature("Login")
+@allure.story("Login page title")
 def test_login_page_title(driver):
-    login_page = LoginPage(driver)
-    login_page.open()
 
-    assert "The Internet" in login_page.get_title()
-    assert "/login" in login_page.get_current_url()
+    with allure.step("Open login page"):
+        login_page = LoginPage(driver)
+        login_page.open()
+
+    with allure.step("Verify title and URL"):
+        assert "The Internet" in login_page.get_title()
+        assert "/login" in login_page.get_current_url()
