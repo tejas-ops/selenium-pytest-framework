@@ -1,23 +1,48 @@
-name: Selenium Pytest CI
+name: Full Test Suite
 
 on:
   push:
-    branches: ["main", "master"]
+    branches: [main]
   pull_request:
-    branches: ["main", "master"]
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
-  test:
-    runs-on: macos-latest
+  api-tests:
+    name: API tests
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run API tests
+        run: pytest -m api
+
+  ui-tests-safari:
+    name: UI tests (Safari)
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
 
       - name: Install dependencies
         run: |
@@ -25,17 +50,15 @@ jobs:
           pip install -r requirements.txt
 
       - name: Enable Safari WebDriver
-        run: |
-          safaridriver --enable || true
+        run: safaridriver --enable || true
 
-      - name: Run pytest
-        run: |
-          pytest
+      - name: Run UI tests
+        run: pytest -m "smoke or regression"
 
-      - name: Upload HTML report if present
+      - name: Upload screenshots if present
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pytest-report
-          path: reports/
+          name: screenshots
+          path: screenshots/
           if-no-files-found: ignore
