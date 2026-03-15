@@ -12,44 +12,57 @@ from utils.config import BROWSER
 def driver(request):
     temp_profile_dir = None
 
+    # ---------- SAFARI ----------
     if BROWSER == "safari":
         browser = webdriver.Safari()
+
+    # ---------- CHROME ----------
     elif BROWSER == "chrome":
         chrome_options = ChromeOptions()
         chrome_options.add_argument("--window-size=1920,1080")
 
-        temp_profile_dir = tempfile.mkdtemp(prefix="selenium-chrome-profile-")
+        # create temporary profile to avoid session conflicts
+        temp_profile_dir = tempfile.mkdtemp(prefix="selenium-profile-")
         chrome_options.add_argument(f"--user-data-dir={temp_profile_dir}")
 
+        # GitHub Actions CI settings
         if os.getenv("CI"):
-            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--headless=new")
             chrome_options.add_argument("--no-sandbox")
             chrome_options.add_argument("--disable-dev-shm-usage")
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--remote-debugging-port=9222")
 
+            # chrome path in GitHub runners
             if os.path.exists("/usr/bin/google-chrome"):
                 chrome_options.binary_location = "/usr/bin/google-chrome"
 
         browser = webdriver.Chrome(service=ChromeService(), options=chrome_options)
+
+    # ---------- FIREFOX ----------
     elif BROWSER == "firefox":
         browser = webdriver.Firefox()
+
     else:
-        raise ValueError(f"Unsupported browser: {BROWSER}. Use safari, chrome, or firefox.")
+        raise ValueError(f"Unsupported browser: {BROWSER}")
 
     browser.maximize_window()
+
     yield browser
 
+    # ---------- screenshot on failure ----------
     if hasattr(request.node, "rep_call") and request.node.rep_call.failed:
         os.makedirs("screenshots", exist_ok=True)
         browser.save_screenshot(f"screenshots/{request.node.name}.png")
 
     browser.quit()
 
+    # remove temporary chrome profile
     if temp_profile_dir:
         shutil.rmtree(temp_profile_dir, ignore_errors=True)
 
 
+# ---------- pytest hook for test status ----------
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
     outcome = yield
