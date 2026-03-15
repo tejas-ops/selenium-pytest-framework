@@ -52,13 +52,47 @@ jobs:
       - name: Enable Safari WebDriver
         run: safaridriver --enable || true
 
-      - name: Run UI tests
+      - name: Run UI tests in Safari
+        env:
+          BROWSER: safari
         run: pytest -m "smoke or regression"
 
-      - name: Upload screenshots if present
+      - name: Upload Safari screenshots if present
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: screenshots
+          name: screenshots-safari
+          path: screenshots/
+          if-no-files-found: ignore
+
+  ui-tests-chrome:
+    name: UI tests (Chrome)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run UI tests in Chrome
+        env:
+          BROWSER: chrome
+        run: pytest -m "smoke or regression"
+
+      - name: Upload Chrome screenshots if present
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-chrome
           path: screenshots/
           if-no-files-found: ignore
