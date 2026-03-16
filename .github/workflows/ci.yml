@@ -146,9 +146,9 @@ jobs:
           path: downloaded-allure/ui-results
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "20"
+          node-version: "24"
 
       - name: Install Allure CLI
         run: npm install -g allure-commandline
