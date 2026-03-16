@@ -13,20 +13,21 @@ class SecureAreaPage(BasePage):
         self.wait_for_text_in_element(self.FLASH_MESSAGE, "You logged into a secure area!")
 
     def click_logout(self):
-        logout_button = self.wait_for_clickable(self.LOGOUT_BUTTON)
-        try:
-            logout_button.click()
-        except Exception:
-            self.driver.execute_script("arguments[0].click();", logout_button)
+        self.wait_for_clickable(self.LOGOUT_BUTTON).click()
 
     def wait_until_logged_out(self):
+        # Safari can keep stale frame context after redirect
+        try:
+            self.driver.switch_to.default_content()
+        except Exception:
+            pass
+
         self.wait.until(
             EC.any_of(
                 EC.presence_of_element_located(self.LOGIN_USERNAME),
                 EC.text_to_be_present_in_element(self.FLASH_MESSAGE, "You logged out of the secure area!"),
                 EC.url_contains("/login"),
                 EC.url_contains("/authenticate"),
-                EC.invisibility_of_element_located(self.LOGOUT_BUTTON),
             )
         )
 
