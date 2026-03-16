@@ -29,7 +29,15 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run API tests
-        run: pytest -m api
+        run: pytest -m api --alluredir=allure-results
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: allure-results-api
+          path: allure-results/
+          if-no-files-found: ignore
 
   ui-tests-safari:
     name: UI tests (Safari)
@@ -90,7 +98,15 @@ jobs:
       - name: Run UI tests in Chrome
         env:
           BROWSER: chrome
-        run: pytest -m "smoke or regression"
+        run: pytest -m "smoke or regression" --alluredir=allure-results
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: allure-results-ui-chrome
+          path: allure-results/
+          if-no-files-found: ignore
 
       - name: Upload Chrome screenshots if present
         if: always()
