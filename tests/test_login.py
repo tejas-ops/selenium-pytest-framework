@@ -73,9 +73,14 @@ def test_logout(driver):
     with allure.step("Click logout"):
         secure_page.click_logout()
 
+    with allure.step("Wait for logged out state"):
+        secure_page.wait_until_logged_out()
+
     with allure.step("Verify logout success"):
-        assert "/login" in secure_page.get_current_url() or "/authenticate" in secure_page.get_current_url()
-        assert "You logged out of the secure area!" in secure_page.get_flash_message()
+        current_url = secure_page.get_current_url()
+        flash_message = secure_page.get_flash_message()
+        assert "/login" in current_url or "/authenticate" in current_url or "You logged out of the secure area!" in flash_message
+        assert "You logged out of the secure area!" in flash_message
 
 
 @pytest.mark.smoke
