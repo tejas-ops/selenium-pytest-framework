@@ -13,6 +13,21 @@
       "username": "tomsmith",
       "password": "wrongpass",
       "expected_message": "Your password is invalid!"
+    },
+    {
+      "username": "",
+      "password": "SuperSecretPassword!",
+      "expected_message": "Your username is invalid!"
+    },
+    {
+      "username": "tomsmith",
+      "password": "",
+      "expected_message": "Your password is invalid!"
+    },
+    {
+      "username": "' OR '1'='1",
+      "password": "' OR '1'='1",
+      "expected_message": "Your username is invalid!"
     }
   ]
 }

@@ -1,5 +1,7 @@
-selenium
-pytest
-pytest-html
-allure-pytest
-requests
+selenium==4.27.1
+pytest==8.3.5
+pytest-html==4.1.1
+pytest-rerunfailures==15.0
+pytest-xdist==3.6.1
+allure-pytest==2.13.5
+requests==2.32.3
