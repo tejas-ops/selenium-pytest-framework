@@ -22,14 +22,16 @@ class SecureAreaPage(BasePage):
         except Exception:
             pass
 
+        # Wait for navigation away from the secure area first
         self.wait.until(
             EC.any_of(
-                EC.presence_of_element_located(self.LOGIN_USERNAME),
-                EC.text_to_be_present_in_element(self.FLASH_MESSAGE, "You logged out of the secure area!"),
                 EC.url_contains("/login"),
                 EC.url_contains("/authenticate"),
             )
         )
+        # Then wait specifically for the logout flash — resolving on URL alone
+        # caused get_flash_message() to read stale "logged in" text in Safari
+        self.wait_for_text_in_element(self.FLASH_MESSAGE, "You logged out of the secure area!")
 
     def get_flash_message(self):
         return self.wait_for_element(self.FLASH_MESSAGE).text
