@@ -1,6 +1,8 @@
-import pytest
-import allure
 import os
+
+import allure
+import pytest
+
 from utils.api_client import APIClient
 from utils.data_loader import load_json
 
@@ -8,17 +10,19 @@ api_data = load_json("api_users.json")
 create_user_data = api_data["create_user"]
 update_user_data = api_data["update_user"]
 
+
 @pytest.fixture
 def api_client():
     return APIClient()
 
 
-# Helper to ensure a valid ReqRes API key is configured
 def require_reqres_api_key():
+    """Skip test if a valid ReqRes API key is not configured."""
     api_key = os.getenv("REQRES_API_KEY")
     if not api_key or api_key.startswith("paste_") or api_key.startswith("actual_"):
         pytest.skip(
-            "Valid ReqRes API key not configured. Set REQRES_API_KEY to a real key from app.reqres.in/api-keys and rerun pytest -m api."
+            "Valid ReqRes API key not configured. "
+            "Set REQRES_API_KEY to a real key from app.reqres.in/api-keys and rerun pytest -m api."
         )
 
 
@@ -35,10 +39,12 @@ def test_get_users(api_client):
 
     with allure.step("Verify response contains user data"):
         body = response.json()
-        assert isinstance(body, list)
-        assert len(body) > 0
-        assert "id" in body[0]
-        assert "name" in body[0]
+        # ReqRes wraps the list under a 'data' key
+        assert "data" in body
+        assert isinstance(body["data"], list)
+        assert len(body["data"]) > 0
+        assert "id" in body["data"][0]
+        assert "email" in body["data"][0]
 
 
 @pytest.mark.api
@@ -54,7 +60,8 @@ def test_get_single_user(api_client):
 
     with allure.step("Verify returned user id is 2"):
         body = response.json()
-        assert body["id"] == 2
+        # ReqRes wraps single user under a 'data' key
+        assert body["data"]["id"] == 2
 
 
 @pytest.mark.api
@@ -65,7 +72,7 @@ def test_create_user(api_client):
     with allure.step("Send POST request to create user"):
         response = api_client.create_user(
             create_user_data["name"],
-            create_user_data["job"]
+            create_user_data["job"],
         )
 
     with allure.step("Verify status code is 201"):
@@ -75,6 +82,8 @@ def test_create_user(api_client):
         body = response.json()
         assert body["name"] == create_user_data["name"]
         assert body["job"] == create_user_data["job"]
+        assert "id" in body
+        assert "createdAt" in body
 
 
 @pytest.mark.api
@@ -86,7 +95,7 @@ def test_update_user(api_client):
         response = api_client.update_user(
             update_user_data["id"],
             update_user_data["name"],
-            update_user_data["job"]
+            update_user_data["job"],
         )
 
     with allure.step("Verify status code is 200"):
@@ -94,9 +103,10 @@ def test_update_user(api_client):
 
     with allure.step("Verify updated payload"):
         body = response.json()
-        assert body["id"] == update_user_data["id"]
+        # ReqRes PUT does not echo back id, only name/job/updatedAt
         assert body["name"] == update_user_data["name"]
         assert body["job"] == update_user_data["job"]
+        assert "updatedAt" in body
 
 
 @pytest.mark.api
